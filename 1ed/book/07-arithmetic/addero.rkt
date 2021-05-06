@@ -1,0 +1,98 @@
+#lang racket
+(require "../libs/trs/mk.rkt")
+(require "./full-addero.rkt")
+(require "./poso.rkt")
+(require "./gt1o.rkt")
+(provide (all-defined-out))
+
+; 7.118.1
+(define addero
+  (lambda (d n m r)
+    (condi
+     ((== 0 d) (== '() m) (== n r))
+     ((== 0 d) (== '() n) (== m r)
+               (poso m))
+     ((== 1 d) (== '() m)
+               (addero 0 n '(1) r))
+     ((== 1 d) (== '() n) (poso m)
+               (addero 0 '(1) m r))
+     ((== '(1) n) (== '(1) m)
+                  (fresh (a c)
+                         (== `(,a ,c) r)
+                         (full-addero d 1 1 a c)))
+     ((== '(1) n) (gen-addero d n m r))
+     ((== '(1) m) (>1o n) (>1o r)
+                  (addero d '(1) n r))
+     ((>1o n) (gen-addero d n m r))
+     (else fail))))
+
+; 7.118.2
+(define gen-addero
+  (lambda (d n m r)
+    (fresh (a b c e x y z)
+           (== `(,a . ,x) n)
+           (== `(,b . ,y) m) (poso y)
+           (== `(,c . ,z) r) (poso z)
+           (alli
+            (full-addero d a b c e)
+            (addero e x y z)))))
+
+(module+ main
+  (require "../libs/trs/mkextraforms.rkt")
+  (require "../libs/test-harness.rkt")
+
+  (test-check "7.97"
+              (run 3 (s)
+                   (fresh (x y r)
+                          (addero 0 x y r)
+                          (== `(,x ,y ,r) s)))
+              `((_.0 () _.0)
+                (() (_.0 . _.1) (_.0 . _.1))
+                ((1) (1) (0 1))))
+
+  (test-check "7.101"
+              (run 22 (s)
+                   (fresh (x y r)
+                          (addero 0 x y r)
+                          (== `(,x ,y ,r) s)))
+              `((_.0 () _.0)
+                (() (_.0 . _.1) (_.0 . _.1))
+                ((1) (1) (0 1))
+                ((1) (0 _.0 . _.1) (1 _.0 . _.1))
+                ((0 _.0 . _.1) (1) (1 _.0 . _.1))
+                ((1) (1 1) (0 0 1))
+                ((0 1) (0 1) (0 0 1))
+                ((1) (1 0 _.0 . _.1) (0 1 _.0 . _.1))
+                ((1 1) (1) (0 0 1))
+                ((1) (1 1 1) (0 0 0 1))
+                ((1 1) (0 1) (1 0 1))
+                ((1) (1 1 0 _.0 . _.1) (0 0 1 _.0 . _.1))
+                ((1 0 _.0 . _.1) (1) (0 1 _.0 . _.1))
+                ((1) (1 1 1 1) (0 0 0 0 1))
+                ((0 1) (0 0 _.0 . _.1) (0 1 _.0 . _.1))
+                ((1) (1 1 1 0 _.0 . _.1) (0 0 0 1 _.0 . _.1))
+                ((1 1 1) (1) (0 0 0 1))
+                ((1) (1 1 1 1 1) (0 0 0 0 0 1))
+                ((0 1) (1 1) (1 0 1))
+                ((1) (1 1 1 1 0 _.0 . _.1) (0 0 0 0 1 _.0 . _.1))
+                ((1 1 0 _.0 . _.1) (1) (0 0 1 _.0 . _.1))
+                ((1) (1 1 1 1 1 1) (0 0 0 0 0 0 1))))
+
+  (test-check "7.120"
+              (run* (s)
+                    (gen-addero 1 '(0 1 1) '(1 1) s))
+              (list `(0 1 0 1)))
+
+  (test-check "7.126"
+              (run* (s)
+                    (fresh (x y)
+                           (addero 0 x y '(1 0 1))
+                           (== `(,x ,y) s)))
+              `(((1 0 1) ())
+                (() (1 0 1))
+                ((1) (0 0 1))
+                ((0 0 1) (1))
+                ((1 1) (0 1))
+                ((0 1) (1 1))))
+
+  )
