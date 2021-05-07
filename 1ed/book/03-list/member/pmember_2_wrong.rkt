@@ -26,5 +26,15 @@
                     (pmembero 'tofu `(a b tofu d tofu))
                     (== #t q))
               `(#t #t #t))
+  
+  (run* (q)
+        (pmembero 'tofu `(a b tofu d x)))
+  ;; '(_.0)
 
+  (run* (q)
+        (pmembero 'tofu `(a b tofu d . x)))
+  ;; '(_.0) ; wrong, should '()
+
+  ;; another wrong point is 3.84
+  
   )

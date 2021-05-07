@@ -38,6 +38,14 @@
                 (_.0 _.1 _.2 _.3 _.4 tofu _.5 . _.6)
                 (_.0 _.1 _.2 _.3 _.4 tofu)))
 
+  (run* (q)
+        (pmembero 'tofu `(a b tofu d x)))
+  ;; '(_.0)
+
+  (run* (q)
+        (pmembero 'tofu `(a b tofu d . x)))
+  ;; '(_.0) ; still wrong, should '()
+
   )
 
 

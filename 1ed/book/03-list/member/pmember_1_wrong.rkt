@@ -34,7 +34,11 @@
                     (pmembero 'tofu `(a b tofu d tofu))
                     (== #t q))
               `(#t))
-
+  
+  (run* (q)
+        (pmembero 'tofu `(a b tofu d x)))
+  ;; '()
+  
   )
 
 
